@@ -3,35 +3,34 @@ from bs4  import BeautifulSoup
 import json
 import re
 
-page = urllib.request.urlopen("http://woobox.com/2evorj/gallery/HOrALzX1uVs")
-soup = BeautifulSoup(page, "html.parser")
+def crawl(url, me):
+    page = urllib.request.urlopen(url)
+    soup = BeautifulSoup(page, "html.parser")
 
-pattern = re.compile('var context = (.*\s\S.*);')
-scripts = soup.find_all('script')
-for script in scripts:
-    if(pattern.search(str(script.string))):
-        data = pattern.search(script.string)
-        content = json.loads(data.groups()[0])
+    pattern = re.compile('var context = (.*\s\S.*);')
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if(pattern.search(str(script.string))):
+            data = pattern.search(script.string)
+            content = json.loads(data.groups()[0])
 
-contestants = content['offer']['uploads']['data']
-votes = []
+    contestants = content['offer']['uploads']['data']
+    votes = []
+    for contestant in contestants:
+        if contestant['uploaded_by'] == me["name"]:
+            me["pic"] = contestant['url']
+        votes.append({"contestant":contestant['uploaded_by'], "votes":contestant["votes"]})
 
-me = {
-    "name": "Cristina M.",
-}
+    newlist = sorted(votes, key=lambda k: k['votes'], reverse=True) 
 
-for contestant in contestants:
-    if contestant['uploaded_by'] == me["name"]:
-        me["pic"] = contestant['url']
-    votes.append({"contestant":contestant['uploaded_by'], "votes":contestant["votes"]})
+    for i in newlist:
+        if i['contestant'] == me["name"]:
+            me["position"] = newlist.index(i) + 1
 
-newlist = sorted(votes, key=lambda k: k['votes'], reverse=True) 
+    return newlist
 
-for i in newlist:
-    if i['contestant'] == me["name"]:
-        me["position"] = newlist.index(i) + 1
 
-def get_podium():
+def get_podium(newlist):
     return {'first':
                 {"name":newlist[0]["contestant"],
                 "votes": newlist[0]["votes"]},
@@ -42,6 +41,3 @@ def get_podium():
                 {"name":newlist[2]["contestant"],
                     "votes": newlist[2]["votes"]},
             }
-
-def get_me():
-    return me

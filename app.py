@@ -7,7 +7,11 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('dinamic.html', me = crawler.get_me(), ranking = crawler.get_podium())
+    me = {
+    "name": "Cristina M.",
+    }
+    podium = crawler.crawl("http://woobox.com/2evorj/gallery/HOrALzX1uVs", me)
+    return render_template('dinamic.html', me = me, ranking = crawler.get_podium(podium))
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
