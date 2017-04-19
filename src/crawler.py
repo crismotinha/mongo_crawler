@@ -12,15 +12,14 @@ def get_total_pages(url):
 
 
 def crawl(url, me, votes_list):
-    page = urllib.request.urlopen(url)
-    content = json.loads(page.read().decode('utf-8'), strict=False)
-    contestants = content['offer']['uploads']['data']
-    votes_list = []
-    for contestant in contestants:
-        if contestant['uploaded_by'] == me["name"]:
-            me["pic"] = contestant['url']
-        votes_list.append({"contestant":contestant['uploaded_by'], "votes":int(contestant["votes"])})
-    return votes_list
+    r = requests.get(url).json()
+    contestants = r['offer']['uploads']['data']
+    return votes_list = [
+            { 
+                "contestant": contestant['uploaded_by'],
+                "votes": int(contestant["votes"])
+            }
+            for contestant in contestants]
 
 
 def get_podium(newlist, me):
