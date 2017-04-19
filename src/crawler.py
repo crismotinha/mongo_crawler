@@ -3,19 +3,13 @@ from bs4 import BeautifulSoup
 import json
 import re
 
+import requests
+
 def get_total_pages(url):
-    page = urllib.request.urlopen(url)
-    soup = BeautifulSoup(page, "html.parser")
-    pattern = re.compile('var context = (.*\s\S.*);')
-    scripts = soup.find_all('script')
-    for script in scripts:
-        if(pattern.search(str(script.string))):
-            data = pattern.search(script.string)
-            content = json.loads(data.groups()[0])
-    if 'total_pages' in content['offer']['uploads']['paging']:
-        return content['offer']['uploads']['paging']['total_pages']
-    else:
-        return 10
+    url = 'https://woobox.com/2evorj/context/votepage?page=0'
+    r = requests.get(url).json()
+    return r.get('offer').get('uploads').get('paging').get('total_pages')
+
 
 def crawl(url, me, votes_list):
     page = urllib.request.urlopen(url)
