@@ -1,8 +1,3 @@
-import urllib.request
-from bs4 import BeautifulSoup
-import json
-import re
-
 import requests
 
 def get_total_pages(url):
@@ -14,7 +9,7 @@ def get_total_pages(url):
 def crawl(url, me, votes_list):
     r = requests.get(url).json()
     contestants = r['offer']['uploads']['data']
-    return votes_list = [
+    return [
             { 
                 "contestant": contestant['uploaded_by'],
                 "votes": int(contestant["votes"])
