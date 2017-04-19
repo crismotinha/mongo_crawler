@@ -3,10 +3,22 @@ from bs4 import BeautifulSoup
 import json
 import re
 
+def get_total_pages(url):
+    page = urllib.request.urlopen(url)
+    soup = BeautifulSoup(page, "html.parser")
+    pattern = re.compile('var context = (.*\s\S.*);')
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if(pattern.search(str(script.string))):
+            data = pattern.search(script.string)
+            content = json.loads(data.groups()[0])
+    if 'total_pages' in content['offer']['uploads']['paging']:
+        return content['offer']['uploads']['paging']['total_pages']
+    else:
+        return 10
+
 def crawl(url, me, votes_list):
     page = urllib.request.urlopen(url)
-    # soup = BeautifulSoup(page, "html.parser")
-    # raw_content = soup.decode("utf-8")
     content = json.loads(page.read().decode('utf-8'), strict=False)
     contestants = content['offer']['uploads']['data']
     votes_list = []
@@ -18,12 +30,10 @@ def crawl(url, me, votes_list):
 
 
 def get_podium(newlist, me):
-    print(newlist)
     newlist = sorted(newlist, key=lambda k: k['votes'], reverse=True)
     for i in newlist:
         if i['contestant'] == me["name"]:
             me["position"] = newlist.index(i) + 1
-    print(newlist)
     return {'first':
     {"name":newlist[0]["contestant"],
     "votes": newlist[0]["votes"]},
